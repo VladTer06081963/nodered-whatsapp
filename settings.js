@@ -512,6 +512,15 @@ module.exports = {
     // os:require('os'),
   },
 
+  /** Environment variables that can be used in flows
+   * These can be accessed in Function nodes using env.get("VARIABLE_NAME")
+   */
+  environmentContext: {
+    OLLAMA_URL: process.env.OLLAMA_URL || "http://192.168.50.250:11434",
+    OLLAMA_MODEL: process.env.OLLAMA_MODEL || "gpt-oss:20b",
+    WHATSAPP_DEFAULT_NUMBER: process.env.WHATSAPP_DEFAULT_NUMBER || "",
+  },
+
   /** The maximum number of messages nodes will buffer internally as part of their
    * operation. This applies across a range of nodes that operate on message sequences.
    * defaults to no limit. A value of 0 also means no limit is applied.

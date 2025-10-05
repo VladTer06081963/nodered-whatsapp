@@ -24,7 +24,8 @@
                 "default": "#0094CE",
                 "baseColor": "#0094CE",
                 "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
-                "edited": false
+                "edited": true,
+                "reset": false
             },
             "darkTheme": {
                 "default": "#097479",
@@ -123,6 +124,15 @@
         "className": ""
     },
     {
+        "id": "4c36c455f7501c93",
+        "type": "whatsappLink",
+        "cName": "whatsapp-web",
+        "name": "Web",
+        "clientType": "waWebClient",
+        "onlineStatus": true,
+        "loopTime": 5
+    },
+    {
         "id": "3acad7d1c316a67c",
         "type": "ui_template",
         "z": "b07d4603f9e21fa9",
@@ -131,16 +141,166 @@
         "order": 0,
         "width": 0,
         "height": 0,
-        "format": "<div ng-bind-html=\"msg.payload\">Hello Whats App</div>",
+        "format": "<div ng-bind-html=\"msg.payload\">111</div>",
         "storeOutMessages": true,
         "fwdInMessages": true,
         "resendOnRefresh": true,
         "templateScope": "local",
         "className": "",
-        "x": 460,
-        "y": 140,
+        "x": 480,
+        "y": 300,
         "wires": [
             []
         ]
+    },
+    {
+        "id": "dc974e830776c1f0",
+        "type": "debug",
+        "z": "b07d4603f9e21fa9",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 880,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "a56b6b114c79ed40",
+        "type": "admin",
+        "z": "b07d4603f9e21fa9",
+        "name": "WA Admin",
+        "whatsappLink": "4c36c455f7501c93",
+        "x": 250,
+        "y": 80,
+        "wires": [
+            [
+                "1bd871b2c4fcc360"
+            ]
+        ]
+    },
+    {
+        "id": "71de38466772fc14",
+        "type": "chats-in",
+        "z": "b07d4603f9e21fa9",
+        "name": "Chats In",
+        "whatsappLink": "4c36c455f7501c93",
+        "whatsappLiteevent": "messages.upsert",
+        "whatsappWebevent": "message",
+        "x": 240,
+        "y": 180,
+        "wires": [
+            [
+                "1f9f218959cef499"
+            ]
+        ]
+    },
+    {
+        "id": "1bd871b2c4fcc360",
+        "type": "debug",
+        "z": "b07d4603f9e21fa9",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 400,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "1f9f218959cef499",
+        "type": "function",
+        "z": "b07d4603f9e21fa9",
+        "name": "Prepare Ollama Request",
+        "func": "// Get Ollama URL from environment variable or use default\nconst ollamaUrl = env.get(\"OLLAMA_URL\") || \"http://192.168.50.250:11434\";\nconst ollamaModel = env.get(\"OLLAMA_MODEL\") || \"gpt-oss:20b\";\n\nmsg.url = ollamaUrl + \"/api/generate\";\nmsg.method = \"POST\";\nvar prompt = msg.payload;\n\nmsg.payload = {\n    \"model\": ollamaModel,\n    \"prompt\": prompt,\n    \"stream\": false\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 180,
+        "wires": [
+            [
+                "4cdc6c609fcf6b56"
+            ]
+        ]
+    },
+    {
+        "id": "4cdc6c609fcf6b56",
+        "type": "http request",
+        "z": "b07d4603f9e21fa9",
+        "name": "Ollama API",
+        "method": "POST",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": true,
+        "headers": [],
+        "x": 530,
+        "y": 180,
+        "wires": [
+            [
+                "5575afbd889c3b0b"
+            ],
+            [
+                "dc974e830776c1f0"
+            ]
+        ]
+    },
+    {
+        "id": "5575afbd889c3b0b",
+        "type": "change",
+        "z": "b07d4603f9e21fa9",
+        "name": "Extract AI Response",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.response",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 730,
+        "y": 180,
+        "wires": [
+            [
+                "dc974e830776c1f0",
+                "4edd6a6e1267dc11"
+            ]
+        ]
+    },
+    {
+        "id": "4edd6a6e1267dc11",
+        "type": "chats-out",
+        "z": "b07d4603f9e21fa9",
+        "name": "Chats Out",
+        "whatsappLink": "4c36c455f7501c93",
+        "number": "",
+        "x": 930,
+        "y": 180,
+        "wires": []
     }
 ]
