@@ -147,8 +147,8 @@
         "resendOnRefresh": true,
         "templateScope": "local",
         "className": "",
-        "x": 480,
-        "y": 300,
+        "x": 660,
+        "y": 380,
         "wires": [
             []
         ]
@@ -166,8 +166,8 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 880,
-        "y": 120,
+        "x": 860,
+        "y": 100,
         "wires": []
     },
     {
@@ -176,8 +176,8 @@
         "z": "b07d4603f9e21fa9",
         "name": "WA Admin",
         "whatsappLink": "4c36c455f7501c93",
-        "x": 250,
-        "y": 80,
+        "x": 290,
+        "y": 120,
         "wires": [
             [
                 "1bd871b2c4fcc360"
@@ -192,8 +192,8 @@
         "whatsappLink": "4c36c455f7501c93",
         "whatsappLiteevent": "messages.upsert",
         "whatsappWebevent": "message",
-        "x": 240,
-        "y": 180,
+        "x": 100,
+        "y": 40,
         "wires": [
             [
                 "1f9f218959cef499"
@@ -213,27 +213,30 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 400,
-        "y": 80,
+        "x": 480,
+        "y": 120,
         "wires": []
     },
     {
         "id": "1f9f218959cef499",
         "type": "function",
         "z": "b07d4603f9e21fa9",
-        "name": "Prepare Ollama Request",
-        "func": "// Get Ollama URL from environment variable or use default\nconst ollamaUrl = env.get(\"OLLAMA_URL\") || \"http://192.168.50.250:11434\";\nconst ollamaModel = env.get(\"OLLAMA_MODEL\") || \"gpt-oss:20b\";\n\nmsg.url = ollamaUrl + \"/api/generate\";\nmsg.method = \"POST\";\nvar prompt = msg.payload;\n\nmsg.payload = {\n    \"model\": ollamaModel,\n    \"prompt\": prompt,\n    \"stream\": false\n};\n\nreturn msg;",
-        "outputs": 1,
+        "name": "Filter & Prepare Request",
+        "func": "// ФИЛЬТРАЦИЯ СООБЩЕНИЙ (как в Telegram)\n\n// 1. Игнорировать свои сообщения (как бот не отвечает сам себе)\nif (msg.message && msg.message.fromMe) {\n    return null;\n}\n\n// 2. Игнорировать пустые сообщения\nif (!msg.payload || msg.payload.trim() === '') {\n    return null;\n}\n\n// 3. Игнорировать медиа без текста (опционально)\n// if (msg.message && msg.message.hasMedia && !msg.payload) {\n//     return null;\n// }\n\n// 4. Обработка команд (как /start в Telegram)\nif (msg.payload.startsWith('/')) {\n    const command = msg.payload.split(' ')[0].toLowerCase();\n    \n    switch(command) {\n        case '/start':\n        case '/help':\n            msg.skipAI = true;\n            msg.payload = \"Привет! 👋\\n\\nЯ AI-бот на базе Ollama.\\n\\nПросто напиши мне сообщение, и я отвечу!\\n\\nКоманды:\\n/help - это сообщение\\n/info - информация о боте\";\n            break;\n        case '/info':\n            msg.skipAI = true;\n            msg.payload = `🤖 AI Bot\\nМодель: ${env.get(\"OLLAMA_MODEL\") || \"gpt-oss:20b\"}\\nСервер: ${env.get(\"OLLAMA_URL\") || \"http://192.168.50.250:11434\"}`;\n            break;\n        default:\n            msg.skipAI = true;\n            msg.payload = \"❌ Неизвестная команда. Используй /help\";\n    }\n}\n\n// Save WhatsApp message context for reply\nmsg.whatsappMessage = msg.message;\nmsg.whatsappFrom = msg.from;\nmsg.whatsappChatID = msg.chatID;\n\n// Если команда - пропускаем AI\nif (msg.skipAI) {\n    return [null, msg]; // output 2 - bypass AI\n}\n\n// Get Ollama URL from environment variable or use default\nconst ollamaUrl = env.get(\"OLLAMA_URL\") || \"http://192.168.50.250:11434\";\nconst ollamaModel = env.get(\"OLLAMA_MODEL\") || \"gpt-oss:20b\";\n\nmsg.url = ollamaUrl + \"/api/generate\";\nmsg.method = \"POST\";\nvar prompt = msg.payload;\n\nmsg.payload = {\n    \"model\": ollamaModel,\n    \"prompt\": prompt,\n    \"stream\": false\n};\n\nreturn [msg, null]; // output 1 - go to AI",
+        "outputs": 2,
         "timeout": 0,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 380,
-        "y": 180,
+        "x": 310,
+        "y": 40,
         "wires": [
             [
                 "4cdc6c609fcf6b56"
+            ],
+            [
+                "5575afbd889c3b0b"
             ]
         ]
     },
@@ -253,14 +256,11 @@
         "authType": "",
         "senderr": true,
         "headers": [],
-        "x": 530,
-        "y": 180,
+        "x": 570,
+        "y": 40,
         "wires": [
             [
                 "5575afbd889c3b0b"
-            ],
-            [
-                "dc974e830776c1f0"
             ]
         ]
     },
@@ -276,6 +276,27 @@
                 "pt": "msg",
                 "to": "payload.response",
                 "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "message",
+                "pt": "msg",
+                "to": "whatsappMessage",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "from",
+                "pt": "msg",
+                "to": "whatsappFrom",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "chatID",
+                "pt": "msg",
+                "to": "whatsappChatID",
+                "tot": "msg"
             }
         ],
         "action": "",
@@ -283,7 +304,7 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 730,
+        "x": 740,
         "y": 180,
         "wires": [
             [
@@ -298,8 +319,8 @@
         "z": "b07d4603f9e21fa9",
         "name": "Chats Out",
         "whatsappLink": "4c36c455f7501c93",
-        "number": "",
-        "x": 930,
+        "number": "+380688508058",
+        "x": 950,
         "y": 180,
         "wires": []
     }

@@ -1,7 +1,7 @@
 {
     "node-red": {
         "name": "node-red",
-        "version": "4.0.9-git",
+        "version": "4.1.0-git",
         "local": false,
         "user": false,
         "nodes": {
@@ -429,7 +429,7 @@
     },
     "node-red-dashboard": {
         "name": "node-red-dashboard",
-        "version": "3.6.5",
+        "version": "3.6.6",
         "local": false,
         "user": false,
         "nodes": {
