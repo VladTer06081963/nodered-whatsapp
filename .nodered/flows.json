@@ -304,14 +304,14 @@
         ]
     },
     {
-        "id": "4edd6a6e1267dc11",
-        "type": "chats-out",
-        "z": "b07d4603f9e21fa9",
-        "name": "Chats Out",
-        "whatsappLink": "4c36c455f7501c93",
-        "number": "+380688508058",
-        "x": 950,
-        "y": 180,
-        "wires": []
+    "id": "4edd6a6e1267dc11",
+    "type": "chats-out",
+    "z": "b07d4603f9e21fa9",
+    "name": "Chats Out",
+    "whatsappLink": "4c36c455f7501c93",
+    "number": "${WHATSAPP_DEFAULT_NUMBER}",
+    "x": 950,
+    "y": 180,
+    "wires": []
     }
 ]
